@@ -1,0 +1,15 @@
+# 环境变量：dev-开发环境，pro-线上环境
+WEB3_ENV=dev
+
+# Mysql数据库连接
+DATABASE_URL=mysql+pymysql://root:root@127.0.0.1:3306/web3_spider?charset=utf8mb4
+# 是否显示数据运行的sql
+DATABASE_ECHO=False
+
+# Redis缓存
+REDIS_URI=127.0.0.1
+REDIS_PORT=6379
+REDIS_DB=0
+
+# 日志等级
+LOG_LEVEL='warning' # debug info warning error
