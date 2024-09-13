@@ -30,7 +30,7 @@ for name in user_list:
             continue
 
         user_rest_id = user.rest_id
-        crawler.sync_content_by_name(name, 10)
+        crawler.sync_content_by_name(name)
     except (TokenWaitError, RateLimitError) as e:
         logging.error(f'所有Token都不可用，等待15分钟后再请求,{str(e)}')
         exit()
