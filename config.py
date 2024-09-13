@@ -14,6 +14,7 @@ class Settings:
     REDIS_PORT: int = os.getenv("REDIS_PORT")
     REDIS_DB: int = os.getenv("REDIS_DB")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL")
+    MESSAGE_TOKEN: str = os.getenv("MESSAGE_TOKEN")
 
 
 settings = Settings()

@@ -11,6 +11,8 @@ r = get_redis()
 
 x = TwitterCrawler(get_db(),r)
 
+x.sync_user_info()
+
 # c = x.get_content_by_name('Solana_zh',2)
 # x.get_detail_content(1833614467487457374)
 

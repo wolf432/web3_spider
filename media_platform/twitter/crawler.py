@@ -16,12 +16,12 @@ from models.twitter import TweetSummaries
 
 class TwitterCrawler():
 
-    def __init__(self, db: Session,redis: Redis, timeout=30):
+    def __init__(self, db: Session, redis: Redis, timeout=30):
         self._user_service = UserService(db)
         self._cookie_service = CookieService(db)
         self._content_service = ContentServie(db)
 
-        self._client = TwitterClient(db,redis,timeout)
+        self._client = TwitterClient(db, redis, timeout)
 
     def get_content_by_name(self, name: str, limit: int = 20):
         """
@@ -116,11 +116,11 @@ class TwitterCrawler():
         一个游客cookie请求限制：95/15分钟
         :return:
         """
-        cooike_amount = self._cookie_service.get_cookie_amount()
+        cookie_amount = self._cookie_service.get_cookie_amount()
         user_amount = self._user_service.get_user_amount()
         user_ceil = math.ceil(user_amount / 95)
-        if cooike_amount < user_ceil:
-            self.sync_cookie_pool(user_ceil - cooike_amount)
+        if cookie_amount < user_ceil:
+            self.sync_cookie_pool(user_ceil - cookie_amount)
 
         header_data = self._cookie_service.get_cookie_with_header()
         current_time = datetime.now()
@@ -128,8 +128,13 @@ class TwitterCrawler():
         user_list = self._user_service.get_user_list_latest()
         for user in user_list:
             # 检查上次跟新时间，1小时内不再更新
-            time_difference = current_time - user.updated_at
-            if time_difference.total_seconds() < 3600:
+            updated_at = user.updated_at  if user.updated_at else 0
+            if updated_at != 0:
+                time_difference = current_time - updated_at
+                difference = time_difference.total_seconds()
+            else:
+                difference = 0
+            if difference < 3600:
                 logger.info(f"{user.name}更新没超过1小时，不更新.")
                 continue
 

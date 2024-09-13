@@ -226,7 +226,7 @@ class ContentServie():
 
     def get_latest_by_user_id(self, user_id: int, date: datetime | None = None):
         """
-        获取指定用户最新的内容，最多返回10条
+        获取指定用户最新的内容，最多返回3条
         :param date: 发布时间，按照发布时间来获取最新的数据，如果没有则返回最新的10条数据
         :param user_id: twitter的用户id
         :return: []
@@ -237,4 +237,4 @@ class ContentServie():
         else:
             query = query.where(TweetSummaries.user_id == user_id, TweetSummaries.x_created_at > date)
 
-        return query.order_by(TweetSummaries.x_created_at.desc()).limit(10).all()
+        return query.order_by(TweetSummaries.x_created_at.desc()).limit(3).all()

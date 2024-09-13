@@ -9,6 +9,7 @@ from media_platform.twitter.service import UserService
 from media_platform.twitter.exception import RateLimitError, TokenWaitError
 from media_platform.twitter.service import ContentServie
 from database import get_db, get_redis
+from tools.message import send_msg
 
 redis = get_redis()
 db = get_db()
@@ -17,9 +18,9 @@ crawler = TwitterCrawler(db, redis)
 user_service = UserService(db)
 content_service = ContentServie(db)
 
-notify_message = [] # 暂存最新博主的信息
+notify_message = []  # 暂存最新博主的信息
 
-user_list = ['Phyrex_Ni','jason_chen998']
+user_list = ['Phyrex_Ni', 'jason_chen998']
 for name in user_list:
     logging.info(f"开始获取{name}的内容")
     try:
@@ -29,8 +30,8 @@ for name in user_list:
             continue
 
         user_rest_id = user.rest_id
-        crawler.sync_content_by_name(name,10)
-    except (TokenWaitError,RateLimitError) as e:
+        crawler.sync_content_by_name(name, 10)
+    except (TokenWaitError, RateLimitError) as e:
         logging.error(f'所有Token都不可用，等待15分钟后再请求,{str(e)}')
         exit()
     except Exception as e:
@@ -48,7 +49,7 @@ for name in user_list:
         logging.info(f"{name}没有最新的内容")
         continue
 
-    redis.set(cache_key,str(contents[0].x_created_at))
+    redis.set(cache_key, str(contents[0].x_created_at))
 
     notify_message.append(f'\n================={name}博主的最新内容：=================\n')
     for con in contents:
@@ -58,3 +59,6 @@ for name in user_list:
         """
         notify_message.append(text)
 
+if len(notify_message) > 0:
+    rs = send_msg("".join(notify_message))
+    logging.info(f"发送信息结果：{str(rs)}")
