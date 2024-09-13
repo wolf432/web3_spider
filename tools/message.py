@@ -15,7 +15,6 @@ def send_msg(content: str) -> bool:
     data = {'content': content}
     try:
         response = requests.post(url + '/message', headers=header, json=data)
-        utils.logger.info(f"发送消息结果：{response.status_code}, body:{response.content}")
         if response.status_code == 200:
             return True
     except Exception as e:
