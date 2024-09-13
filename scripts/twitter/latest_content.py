@@ -51,11 +51,11 @@ for name in user_list:
 
     redis.set(cache_key, str(contents[0].x_created_at))
 
-    notify_message.append(f'\n================={name}博主的最新内容：=================\n')
+    notify_message.append(f'\n========={name}博主的最新内容：==========\n')
     for con in contents:
         text = f"""
         {con.content}
-        发布时间:{con.x_created_at}\t 详情：https://x.com/{name}/status/{con.rest_id}
+        发布时间:{con.x_created_at}
         """
         notify_message.append(text)
 
