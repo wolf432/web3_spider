@@ -1,15 +1,14 @@
 import time
-
-import pytz
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 def current_time():
     """
     返回东八区的当前时间
-    :return:
+    :return: 当前时间，时区为 Asia/Shanghai
     """
-    CST = pytz.timezone('Asia/Shanghai')
+    CST = ZoneInfo('Asia/Shanghai')
     return datetime.now(CST)
 
 
@@ -40,7 +39,10 @@ def convert_to_ymd(date_str: str) -> str:
     # 转换为datetime对象
     date_obj = datetime.strptime(date_str, "%a %b %d %H:%M:%S %z %Y")
 
-    # 格式化为 年-月-日
-    formatted_date = date_obj.strftime("%Y-%m-%d %H:%M:%S")
+    # 转换为目标时区
+    local_date_obj = date_obj.astimezone(ZoneInfo('Asia/Shanghai'))
+
+    # 格式化为 年-月-日 小时:分钟:秒
+    formatted_date = local_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
     return formatted_date
