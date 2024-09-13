@@ -217,6 +217,7 @@ class ContentServie():
                 info.reply_count = val.reply_count
                 info.views_count = val.views_count
                 info.retweet_count = val.retweet_count
+                info.x_created_at = val.x_created_at
             except NoData:
                 self._db.add(val)
             except Exception as e:
