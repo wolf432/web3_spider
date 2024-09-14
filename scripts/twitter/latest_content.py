@@ -30,7 +30,10 @@ content_service = ContentServie(db)
 
 notify_message = []  # 暂存最新博主的信息
 
-user_list = ['Phyrex_Ni', 'jason_chen998']
+user_list = [
+    'Phyrex_Ni', 'jason_chen998','0xDeMoo','VitalikButerin','33357xyz',
+    'tinyxiong_eth','nake13','VV_watch'
+]
 for name in user_list:
     logging.info(f"开始获取{name}的内容")
     try:
