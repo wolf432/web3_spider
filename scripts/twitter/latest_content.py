@@ -10,6 +10,16 @@ from media_platform.twitter.exception import RateLimitError, TokenWaitError
 from media_platform.twitter.service import ContentServie
 from database import get_db, get_redis
 from tools.message import send_msg
+from ai_toolkit.help import model_client_factory, system_message, user_message
+from ai_toolkit.prompt_manager import PromptManager
+
+# AI配置
+ai_client = model_client_factory('zhipu')
+prompt_model = PromptManager()
+prompts = prompt_model.get_prompt('filter_market_noise.md')
+message_list = [
+    system_message(prompts),
+]
 
 redis = get_redis()
 db = get_db()
@@ -60,5 +70,13 @@ for name in user_list:
         notify_message.append(text)
 
 if len(notify_message) > 0:
-    rs = send_msg("".join(notify_message))
+    notify_content = "".join(notify_message)
+    try:
+        message_list.append(user_message(notify_content))
+        response = ai_client.chat(message_list, 'GLM-4-Plus')
+        notify_content = response.choices[0].message.content
+    except Exception as e:
+        logging.warning(f"调用大模型错误.{str(e)}")
+
+    rs = send_msg(notify_content)
     logging.info(f"发送信息结果：{str(rs)}")

@@ -15,6 +15,9 @@ class Settings:
     REDIS_DB: int = os.getenv("REDIS_DB")
     LOG_LEVEL: str = os.getenv("LOG_LEVEL")
     MESSAGE_TOKEN: str = os.getenv("MESSAGE_TOKEN")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+    OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL")
+    ZHIPU_API_KEY: str = os.getenv("ZHIPU_API_KEY")
 
 
 settings = Settings()
