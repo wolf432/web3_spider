@@ -133,7 +133,7 @@ class TwitterCrawler():
                 time_difference = current_time - updated_at
                 difference = time_difference.total_seconds()
             else:
-                difference = 0
+                difference = 3601
             if difference < 3600:
                 logger.info(f"{user.name}更新没超过1小时，不更新.")
                 continue
