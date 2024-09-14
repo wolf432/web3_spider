@@ -69,7 +69,7 @@ for name in user_list:
         text = f"""
         {con.content}
         发布时间:{con.x_created_at}
-        详细链接：f'https://x.com/status/{name}/{con.rest_id}'
+        详细链接：f'https://x.com/{name}/status/{con.rest_id}'
         """
         notify_message.append(text)
 
