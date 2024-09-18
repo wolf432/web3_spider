@@ -86,8 +86,6 @@ def ai_summary(content, ai_type, model, prompt):
 
 def main():
     group_list = user_service.get_watch_group()
-    if len(group_list) == 0:
-        logger.info("没有可执行的")
 
     for group in group_list:
         logger.debug(f"执行{group.group_name}组用户的内容")
