@@ -25,6 +25,7 @@ class XUser(Base):
     followers_count: Mapped[int] = mapped_column(Integer, default=0, nullable=True, comment="粉丝数")
     friends_count: Mapped[int] = mapped_column(Integer, default=0, nullable=True, comment="关注数量")
     statuses_count: Mapped[int] = mapped_column(Integer, default=0, nullable=True, comment="帖子数")
+    is_monitored: Mapped[int] = mapped_column(Integer, default=1, nullable=True, comment="是否监控内容")
 
 
 class CookiePool(Base):
@@ -53,7 +54,8 @@ class TweetSummaries(Base):
     retweet_count: Mapped[int] = mapped_column(Integer, default=0, comment="转发数")
     like_count: Mapped[int] = mapped_column(Integer, default=0, comment="喜欢数")
     views_count: Mapped[int] = mapped_column(Integer, default=0, comment="查看数")
-    x_created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="推特发表时间")
+    x_created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time,
+                                                   comment="推特发表时间")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
     updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
                                                            comment="更新时间")
@@ -71,3 +73,18 @@ class TweetRaw(Base):
     content_id: Mapped[int] = mapped_column(BigInteger, nullable=False, comment="引用tweet_summaries表中的内容ID")
     pid: Mapped[int] = mapped_column(BigInteger, default=0, comment="父内容ID，用于记录回复关系")
     raw_content: Mapped[str] = mapped_column(Text, nullable=False, comment="原文")
+
+
+class WatchXUser(Base):
+    __tablename__ = "watch_x_user"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, comment="主键ID")
+    group_name: Mapped[str] = mapped_column(String(50), nullable=False, comment="分组监控的名")
+    user_ids: Mapped[str] = mapped_column(JSON, nullable=False, comment="分组里包含的用户id")
+    ai_type: Mapped[str] = mapped_column(String(20), nullable=False, comment="要使用的第三方AI大模型")
+    ai_model: Mapped[str] = mapped_column(String(30), nullable=False, comment="要使用的AI模型名")
+    ai_prompt: Mapped[str] = mapped_column(String(50), nullable=False, comment="要使用的提示词模版名")
+    interval: Mapped[int] = mapped_column(Integer, nullable=False, comment="监控的间隔时间(分钟)")
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
+    updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
+                                                           comment="更新时间")
