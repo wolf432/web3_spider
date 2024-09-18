@@ -50,7 +50,7 @@ class TwitterClient(AbstractApiClient):
             cache_key = self.cookie_pool_prefix + api
 
             if self._redis.llen(cache_key) > 0:
-                utils.logger.info(f'{api}队列缓存池不用初始化')
+                utils.logger.debug(f'{api}队列缓存池不用初始化')
                 continue
 
             self._redis.delete(cache_key)

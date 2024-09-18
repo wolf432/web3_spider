@@ -23,6 +23,9 @@ class PromptManager:
         with open(file_path, 'r', encoding='utf-8') as file:
             markdown_content = file.read()
 
+        if not kwargs:
+            return markdown_content
+
         # 替换占位符
         try:
             formatted_content = markdown_content.format(**kwargs)

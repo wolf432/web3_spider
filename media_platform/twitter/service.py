@@ -6,10 +6,10 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import update, delete
 
-from models.twitter import CookiePool, XUser, TweetSummaries
+from models.twitter import CookiePool, XUser, TweetSummaries, WatchXUser
 from tools.time import current_unixtime
 from media_platform.twitter.field import UserInfo
-from media_platform.twitter.exception import NoData, DataAddError, APINOTFOUNDERROR
+from media_platform.twitter.exception import NoData, DataAddError
 from tools.utils import logger
 from media_platform.twitter.help import get_header_by_guest
 
@@ -71,6 +71,13 @@ class UserService():
         """
         return self._db.query(XUser).order_by(XUser.id.desc()).all()
 
+    def get_user_monitored_list(self):
+        """
+        获取需要监控内容的用户列表
+        :return: [XUser]
+        """
+        return self._db.query(XUser).where(XUser.is_monitored == 2).all()
+
     def get_user_amount(self):
         """
         获取用户总数据
@@ -91,6 +98,20 @@ class UserService():
         :return: [XUser]
         """
         return self._db.query(XUser).where(XUser.rest_id == rest_id).first()
+
+    def get_user_by_restIds(self, rest_ids: [int]):
+        """
+        根据用户twitter的id批量获取数据
+        :return: [XUser]
+        """
+        return self._db.query(XUser).where(XUser.rest_id.in_(rest_ids)).all()
+
+    def get_watch_group(self):
+        """
+        获取所有监控分组数据
+        """
+        now = datetime.now()
+        return self._db.query(WatchXUser).where(now >= WatchXUser.last_execution_time).order_by(WatchXUser.interval.asc()).all()
 
 
 class CookieService():
@@ -225,11 +246,12 @@ class ContentServie():
                 raise DataAddError("summaries add_all")
         self._db.commit()
 
-    def get_latest_by_user_id(self, user_id: int, date: datetime | None = None):
+    def get_latest_by_user_id(self, user_id: int, date: datetime | None = None, limit: int = 3):
         """
         获取指定用户最新的内容，最多返回3条
         :param date: 发布时间，按照发布时间来获取最新的数据，如果没有则返回最新的10条数据
         :param user_id: twitter的用户id
+        :param limit: 返回数据数量
         :return: []
         """
         query = self._db.query(TweetSummaries)
@@ -238,4 +260,4 @@ class ContentServie():
         else:
             query = query.where(TweetSummaries.user_id == user_id, TweetSummaries.x_created_at > date)
 
-        return query.order_by(TweetSummaries.x_created_at.desc()).limit(3).all()
+        return query.order_by(TweetSummaries.x_created_at.desc()).limit(limit).all()

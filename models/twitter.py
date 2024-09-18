@@ -86,5 +86,5 @@ class WatchXUser(Base):
     ai_prompt: Mapped[str] = mapped_column(String(50), nullable=False, comment="要使用的提示词模版名")
     interval: Mapped[int] = mapped_column(Integer, nullable=False, comment="监控的间隔时间(分钟)")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
-    updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
-                                                           comment="更新时间")
+    updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,comment="更新时间")
+    last_execution_time: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True,comment="下次执行时间")

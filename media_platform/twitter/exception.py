@@ -53,3 +53,8 @@ class DataAddError(Exception):
 class APINOTFOUNDERROR(Exception):
     """获取api请求cookie错误"""
     pass
+
+
+class APICALLERROR(Exception):
+    """调用AI接口发生错误"""
+    pass
