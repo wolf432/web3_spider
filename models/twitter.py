@@ -40,6 +40,8 @@ class CookiePool(Base):
                                                    comment="过期时间,默认算一个很大的值")
     use_status: Mapped[Optional[int]] = mapped_column(SmallInteger, default=1, nullable=True,
                                                       comment="使用状态:1-可用,2-不可用")
+    platform: Mapped[str] = mapped_column(JSON, nullable=False, comment="平台名")
+
 
 
 class TweetSummaries(Base):
