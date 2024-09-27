@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
 from config import settings
@@ -53,3 +54,16 @@ leve_map = {
 }
 
 logger = init_loging_config(leve_map.get(settings.LOG_LEVEL, logging.INFO))
+
+
+def to_dict(obj):
+    """
+    将SQLAlchemy对象转换为字典
+    """
+    data = {}
+    for column in obj.__table__.columns:
+        value = getattr(obj, column.name)
+        if isinstance(value, datetime):
+            value = value.isoformat()  # 将 datetime 对象转换为 ISO 8601 字符串
+        data[column.name] = value
+    return data
