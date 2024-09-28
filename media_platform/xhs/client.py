@@ -8,7 +8,7 @@ from base.base_crawler import AbstractApiClient
 from urllib.parse import urlencode, quote
 
 from tools.utils import logger
-from tools.time import convert_timestamp_to_date
+from tools.time import convert_timestamp_to_date,random_wait
 from media_platform.xhs.help import sign, convert_str_cookie_to_dict, convert_cookies, chinese_to_number, get_search_id
 from media_platform.xhs.field import SearchSortType, SearchNoteType
 from media_platform.xhs.exception import IPBlockError, DataFetchError
@@ -33,8 +33,15 @@ class XHSClient(AbstractApiClient):
         self._browser = page
         self._tab = self._browser.latest_tab
         self._tab.get(self._domain)
-        if not self.login_status():
+        login_try = 5
+        while not self.login_status() and login_try > 0:
             self.login_cookie(cookie_str)
+            login_try -= 1
+            logger.info(f"尝试登录,剩余次数：{login_try}")
+            random_wait(2,5)
+        if login_try <= 0:
+            logger.error("尝试登录5次失败，退出")
+            exit()
 
     def request(self, method, url, **kwargs):
         """
@@ -99,7 +106,8 @@ class XHSClient(AbstractApiClient):
         """
         logger.debug("开始设置登录的cookie")
         self._tab.set.cookies(f'web_session={cookie_val}; path=/; domain=.xiaohongshu.com;')
-        time.sleep(3)
+        self._tab.refresh()
+        time.sleep(2)
         logger.debug("登录完成")
 
     def login_status(self) -> bool:
