@@ -23,8 +23,8 @@ class XHSCrawler():
     def __init__(self, cookie_str: str, db: Session, redis: Redis):
         co = ChromiumOptions()
         # 设置无头
-        # co.headless()
-        # co.set_argument('--no-sandbox')  # 无沙盒模式
+        co.headless()
+        co.set_argument('--no-sandbox')  # 无沙盒模式
         self.context_page = ChromiumPage(co)
         self.xhs_client = XHSClient(self.context_page, cookie_str)
         self._db = db
