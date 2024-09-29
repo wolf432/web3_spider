@@ -30,17 +30,20 @@ class XHSClient(AbstractApiClient):
         self.NOTE_ABNORMAL_STR = "笔记状态异常，请稍后查看"
         self.NOTE_ABNORMAL_CODE = -510001
 
+        logger.debug("[xhs.XHSClient.__init__] 打开小红书主页")
         self._browser = page
         self._tab = self._browser.latest_tab
         self._tab.get(self._domain)
         login_try = 5
+
+        logger.debug("[xhs.XHSClient.__init__] 检查登录状态")
         while not self.login_status() and login_try > 0:
             self.login_cookie(cookie)
             login_try -= 1
-            logger.info(f"尝试登录,剩余次数：{login_try}")
+            logger.info(f"[xhs.XHSClient.__init__] 尝试登录,剩余次数：{login_try}")
             random_wait(2,5)
         if login_try <= 0:
-            logger.error("尝试登录5次失败，退出")
+            logger.error("[xhs.XHSClient.__init__] 尝试登录5次失败，退出")
             exit()
 
     def request(self, method, url, **kwargs):
@@ -53,10 +56,10 @@ class XHSClient(AbstractApiClient):
         """
         response = requests.request(method, url, **kwargs)
 
-        if response.status_code == 200:
+        if response.status_code == 200 or response.status_code == 200:
             return response
 
-        logger.warning(f"请求错误:{response.content}")
+        logger.warning(f"[xhs.XHSClient.request]请求错误:{response.content},状态码：{response.status_code}")
 
     def _pre_headers(self, url: str, data=None):
         """
@@ -104,11 +107,11 @@ class XHSClient(AbstractApiClient):
         使用cookie登录
         :cookie_str web_session的值
         """
-        logger.debug("开始设置登录的cookie")
+        logger.debug("[xhs.XHSClient.login_cookie]开始设置登录的cookie")
         self._tab.set.cookies(f'a1={cookie["a1"]}; path=/; domain=.xiaohongshu.com;')
         self._tab.set.cookies(f'web_session={cookie["web_session"]}; path=/; domain=.xiaohongshu.com;')
         random_wait(1,3)
-        logger.debug("设置cookie完成")
+        logger.debug("[xhs.XHSClient.login_cookie]设置cookie完成")
 
     def login_status(self) -> bool:
         """
@@ -119,7 +122,7 @@ class XHSClient(AbstractApiClient):
             result = self.get_with_api(uri)
             return result.json().get('success',False)
         except Exception as e:
-            logger.warning('未登录的状态')
+            logger.warning('[xhs.XHSClient.login_status]未登录的状态')
             return False
 
     def get_with_api(self, url: str, domain: str = 'api'):
@@ -170,7 +173,7 @@ class XHSClient(AbstractApiClient):
         match = re.search(r'<script>window.__INITIAL_STATE__=(.+)<\/script>', html_content, re.M)
 
         if match is None:
-            logger.warning(f"{user_id} 没有解析出数据")
+            logger.warning(f"[xhs.XHSClient.browser_user_basic_info] {user_id} 没有解析出数据")
             return None
 
         info = json.loads(match.group(1).replace(':undefined', ':null'), strict=False)
@@ -275,7 +278,7 @@ class XHSClient(AbstractApiClient):
             notes.extend(data)
 
             random_secs = random.uniform(2,8)
-            logger.debug(f"下拉第{num + 1}次,休息{random_secs}秒")
+            logger.debug(f"[xhs.XHSClient.browser_get_note_by_search] 下拉第{num + 1}次,休息{random_secs}秒")
             time.sleep(random_secs)
             self._tab.scroll.to_bottom()
         return notes

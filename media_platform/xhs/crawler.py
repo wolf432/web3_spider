@@ -21,12 +21,14 @@ class XHSCrawler():
     xhs_client: XHSClient
 
     def __init__(self, cookie: dict, db: Session, redis: Redis):
+        logger.debug("[xhs.crawler.__init__] 初始化浏览器")
         co = ChromiumOptions()
         # 设置无头
         co.headless()
         co.set_argument('--no-sandbox')  # 无沙盒模式
         self.context_page = ChromiumPage(co)
         self.xhs_client = XHSClient(self.context_page, cookie)
+        logger.debug("[xhs.crawler.__init__] 初始化浏览器完成")
         self._db = db
         self._redis = redis
 
@@ -143,6 +145,6 @@ class XHSCrawler():
         """
         获取指定用户的信息
         """
-        logger.debug(f"[xhs.crawler.user_info_by_api] 抓取{user_id}用户的数据")
+        logger.info(f"[xhs.crawler.user_info_by_api] 抓取{user_id}用户的数据")
         info = self.xhs_client.browser_user_basic_info(user_id, False)
         return info
