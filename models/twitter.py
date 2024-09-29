@@ -18,6 +18,7 @@ class XUser(Base):
     name: Mapped[str] = mapped_column(String(50), nullable=False, comment="用户名@后面的")
     full_name: Mapped[str] = mapped_column(String(50), default='', nullable=True, comment="全名,主页上显示的名字")
     description: Mapped[str] = mapped_column(String(200), default='', nullable=True, comment="简介")
+    mark: Mapped[str] = mapped_column(String(50), default='', nullable=True, comment="账号备注")
     x_created_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, comment="账号创建日期")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
     updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
