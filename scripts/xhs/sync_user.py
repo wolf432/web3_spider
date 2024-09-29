@@ -20,8 +20,7 @@ if len(cookie_pool) == 0:
 
 for cookie in cookie_pool:
     try:
-        web_session = cookie.value['web_session']
-        crawler = XHSCrawler(web_session, db, redis)
+        crawler = XHSCrawler(cookie.value, db, redis)
         break
     except Exception as e:
         set_cookie_invalid('xhs', [cookie.id])

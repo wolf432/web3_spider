@@ -16,7 +16,7 @@ from media_platform.xhs.exception import IPBlockError, DataFetchError
 
 class XHSClient(AbstractApiClient):
 
-    def __init__(self, page: ChromiumPage, cookie_str: str):
+    def __init__(self, page: ChromiumPage, cookie: dict):
         self._domain = "https://www.xiaohongshu.com"
         self._host = "https://edith.xiaohongshu.com"
         self._header = {
@@ -35,7 +35,7 @@ class XHSClient(AbstractApiClient):
         self._tab.get(self._domain)
         login_try = 5
         while not self.login_status() and login_try > 0:
-            self.login_cookie(cookie_str)
+            self.login_cookie(cookie)
             login_try -= 1
             logger.info(f"尝试登录,剩余次数：{login_try}")
             random_wait(2,5)
@@ -99,26 +99,28 @@ class XHSClient(AbstractApiClient):
         """
         return self.request(method="GET", url=f"{url}", headers=headers)
 
-    def login_cookie(self, cookie_val: str):
+    def login_cookie(self, cookie: dict):
         """
         使用cookie登录
         :cookie_str web_session的值
         """
         logger.debug("开始设置登录的cookie")
-        self._tab.set.cookies(f'web_session={cookie_val}; path=/; domain=.xiaohongshu.com;')
-        self._tab.refresh()
-        time.sleep(2)
-        logger.debug("登录完成")
+        self._tab.set.cookies(f'a1={cookie["a1"]}; path=/; domain=.xiaohongshu.com;')
+        self._tab.set.cookies(f'web_session={cookie["web_session"]}; path=/; domain=.xiaohongshu.com;')
+        random_wait(1,3)
+        logger.debug("设置cookie完成")
 
     def login_status(self) -> bool:
         """
         检查登录状态
         """
         try:
-            me = self._tab.ele(".login-btn").text
+            uri = '/api/sns/web/v2/user/me'
+            result = self.get_with_api(uri)
+            return result.json().get('success',False)
+        except Exception as e:
+            logger.warning('未登录的状态')
             return False
-        except Exception:
-            return True
 
     def get_with_api(self, url: str, domain: str = 'api'):
         """
@@ -328,6 +330,7 @@ class XHSClient(AbstractApiClient):
             page: int = 1,
             search_type: SearchNoteType = SearchNoteType.ALL,
             sort: SearchSortType = SearchSortType.GENERAL,
+            max_try: int = 4
     ):
         """
         根据关键词搜索笔记
@@ -335,6 +338,7 @@ class XHSClient(AbstractApiClient):
         :page: 分页第几页
         :search_type:笔记类型
         :sort: 搜索结果排序指定
+        :max_try: 最大尝试次数，默认4
         """
         uri = "/api/sns/web/v1/search/notes"
         params = {
@@ -346,7 +350,7 @@ class XHSClient(AbstractApiClient):
             "note_type": search_type.value
         }
         try_count = 1
-        while try_count < 4:
+        while try_count < max_try:
             try:
                 return self.post_with_api(uri, params)
             except IPBlockError as e:
