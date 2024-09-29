@@ -10,9 +10,15 @@ from media_platform.xhs.crawler import XHSCrawler
 from media_platform.xhs.service import NoteService, UserService
 from tools.cookie_pool import get_cookie_by_platform, set_cookie_invalid
 from tools.utils import logger
+from tools.time import random_wait
 
 redis = get_redis()
 db = get_db()
+
+random_wait(300, 700)
+exec_cache_key = 'xhs_sync_note_exec'
+if redis.get(exec_cache_key):
+    logger.debug("[xsh.sysc_user] 已经同步过数据了，不在同步")
 
 cookie_pool = get_cookie_by_platform('xhs')
 if len(cookie_pool) == 0:
@@ -71,3 +77,5 @@ for value in keywords:
         time.sleep(pause_duration)
 
     time.sleep(random.uniform(5, 10))
+
+redis.set(exec_cache_key, 1, 3600 * 4)

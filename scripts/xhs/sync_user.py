@@ -13,6 +13,12 @@ from media_platform.xhs.help import chinese_to_number
 redis = get_redis()
 db = get_db()
 
+random_wait(600,1200)
+exec_cache_key = 'xhs_sync_user_exec'
+if redis.get(exec_cache_key):
+    logger.debug("[xsh.sysc_user] 已经同步过数据了，不在同步")
+
+
 cookie_pool = get_cookie_by_platform('xhs')
 if len(cookie_pool) == 0:
     logger.error('[xsh.sysc_user]没有可用的cookie，退出脚本')
@@ -35,6 +41,7 @@ while True:
         logger.info('[xhs.sync_user]获取用户数据出错。返回None')
         exit()
     if len(user_list) == 0:
+        redis.set(exec_cache_key, 1, 3600 * 4)
         logger.info('[xhs.sync_user]没有用户数据')
         exit()
 
