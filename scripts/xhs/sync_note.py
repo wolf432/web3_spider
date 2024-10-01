@@ -8,6 +8,7 @@ import time
 from database import get_db, get_redis
 from media_platform.xhs.crawler import XHSCrawler
 from media_platform.xhs.service import NoteService, UserService
+from media_platform.xhs.field import SearchSortType, SearchNoteType
 from tools.cookie_pool import get_cookie_by_platform, set_cookie_invalid
 from tools.utils import logger
 from tools.time import random_wait
@@ -48,7 +49,7 @@ keywords = [
 
 for value in keywords:
     logger.info(f"开始同步关键词{value['keyword']},一共同步{value['page_size']}页")
-    result = crawler.search_by_api(value['keyword'], value['page_size'])
+    result = crawler.search_by_api(value['keyword'], value['page_size'],SearchNoteType.IMAGE,SearchSortType.GENERAL)
     if result is None:
         logger.error('[xsh.sysc_user]搜索笔记数据为空，脚本停止运行')
 
