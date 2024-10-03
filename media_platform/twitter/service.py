@@ -125,7 +125,7 @@ class CookieService():
         :param id: 表的主键id
         :return: CookiePool
         """
-        cookie = self._db.query(CookiePool).where(CookiePool.id == id).order_by(CookiePool.expired.asc()).one()
+        cookie = self._db.query(CookiePool).where(CookiePool.id == id, CookiePool.platform == 'x').order_by(CookiePool.expired.asc()).one()
         if not cookie:
             raise NoData("没有该条数据")
         return cookie
@@ -138,7 +138,7 @@ class CookieService():
         """
         now = current_unixtime()
         cookie = self._db.query(CookiePool).where(CookiePool.identity_type == guest, CookiePool.expired >= now,
-                                                  CookiePool.amount > 0, CookiePool.use_status == 1).first()
+                                                  CookiePool.amount > 0, CookiePool.use_status == 1, CookiePool.platform == 'x').first()
         if not cookie:
             return {}
         return cookie
@@ -151,7 +151,7 @@ class CookieService():
         """
         now = current_unixtime()
         cookie = self._db.query(CookiePool).where(CookiePool.identity_type == guest, CookiePool.expired >= now,
-                                                  CookiePool.amount > 0, CookiePool.use_status == 1).first()
+                                                  CookiePool.amount > 0, CookiePool.use_status == 1, CookiePool.platform == 'x').first()
         if not cookie:
             raise NoData("没有可用cookie")
         return {
@@ -167,12 +167,12 @@ class CookieService():
         """
         now = current_unixtime()
         return self._db.query(CookiePool).where(CookiePool.identity_type == guest, CookiePool.expired >= now,
-                                                CookiePool.amount > 0, CookiePool.use_status == 1).count()
+                                                CookiePool.amount > 0, CookiePool.use_status == 1, CookiePool.platform == 'x').count()
 
     def get_available_amount(self, guest: int):
         now = current_unixtime()
         return self._db.query(CookiePool).where(CookiePool.identity_type == guest, CookiePool.expired >= now,
-                                                CookiePool.amount > 0, CookiePool.use_status == 1).count()
+                                                CookiePool.amount > 0, CookiePool.use_status == 1, CookiePool.platform == 'x').count()
 
     def set_cookie_invalid(self, ids: [int]):
         """
@@ -180,7 +180,7 @@ class CookieService():
         :param ids:
         :return:
         """
-        stmt = update(CookiePool).values(use_status=2).where(CookiePool.id.in_(ids))
+        stmt = update(CookiePool).values(use_status=2).where(CookiePool.id.in_(ids), CookiePool.platform == 'x')
         self._db.execute(stmt)
         self._db.commit()
 

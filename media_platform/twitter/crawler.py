@@ -178,7 +178,8 @@ class TwitterCrawler():
                     CookiePool(
                         value=guest_cookie['cookies'],
                         expired=guest_cookie['expired'],
-                        identity_type=CookieIdentity.GUEST.value
+                        identity_type=CookieIdentity.GUEST.value,
+                        platform='x'
                     )
                 )
 

@@ -18,6 +18,7 @@ class XUser(Base):
     name: Mapped[str] = mapped_column(String(50), nullable=False, comment="用户名@后面的")
     full_name: Mapped[str] = mapped_column(String(50), default='', nullable=True, comment="全名,主页上显示的名字")
     description: Mapped[str] = mapped_column(String(200), default='', nullable=True, comment="简介")
+    mark: Mapped[str] = mapped_column(String(50), default='', nullable=True, comment="账号备注")
     x_created_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, comment="账号创建日期")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
     updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
@@ -32,14 +33,17 @@ class CookiePool(Base):
     __tablename__ = "cookie_pool"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, comment="主键ID")
-    value: Mapped[str] = mapped_column(JSON, nullable=False, comment="存储所需的cookie字段")
+    value: Mapped[dict] = mapped_column(JSON, nullable=False, comment="存储所需的cookie字段")
     identity_type: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=1,
                                                comment="身份类型:1-游客,2-登录用户")
-    amount: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=2000, comment="剩余次数，默认2000")
-    expired: Mapped[Optional[int]] = mapped_column(Integer, default=1924790400, nullable=True,
+    expired: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=1924790400,
                                                    comment="过期时间,默认算一个很大的值")
-    use_status: Mapped[Optional[int]] = mapped_column(SmallInteger, default=1, nullable=True,
+    use_status: Mapped[Optional[int]] = mapped_column(SmallInteger, nullable=True, default=1,
                                                       comment="使用状态:1-可用,2-不可用")
+    platform: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, default='', comment="平台名")
+    amount: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, default=2000,
+                                                  comment="剩余次数，guest是每30分钟2000次")
+
 
 
 class TweetSummaries(Base):
@@ -57,8 +61,7 @@ class TweetSummaries(Base):
     x_created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time,
                                                    comment="推特发表时间")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False, default=current_time, comment="创建时间")
-    updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,
-                                                           comment="更新时间")
+    updated_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP, nullable=True, onupdate=current_time,comment="更新时间")
     rest_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True, comment="帖子ID")
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True, comment="用户ID")
 

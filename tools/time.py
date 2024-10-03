@@ -1,3 +1,4 @@
+import random
 import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -46,3 +47,31 @@ def convert_to_ymd(date_str: str) -> str:
     formatted_date = local_date_obj.strftime("%Y-%m-%d %H:%M:%S")
 
     return formatted_date
+
+
+from datetime import datetime
+
+
+def convert_timestamp_to_date(timestamp_ms: int) -> str:
+    """
+    将毫秒级时间戳转换为格式为 “年 - 月 - 日” 的日期字符串
+
+    :param timestamp_ms: 毫秒级时间戳
+    :return: A string representing the date in  YYYY-MM-DD HH:MM:SS format
+    """
+    # Convert milliseconds to seconds
+    timestamp_s = timestamp_ms / 1000
+
+    # Convert to a datetime object
+    dt = datetime.fromtimestamp(timestamp_s)
+
+    # Format the datetime object to "YYYY-MM-DD H:i:s"
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def random_wait(start: int, end: int):
+    """
+    在一个区间内随机等待
+    """
+    sec = random.uniform(start, end)
+    time.sleep(sec)

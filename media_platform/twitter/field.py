@@ -17,6 +17,7 @@ class UserInfo(Request_Limit):
     description: str = Field(..., description="描述")
     x_created_at: datetime = Field(..., description="twitter注册日期")
     full_name: str = Field(..., description="主页显示的名字")
+    mark: str | None = Field(None, description="账号备注")
 
 class Content(Request_Limit):
     entry_type: int = Field(..., description='1-原文,2-转发贴')
