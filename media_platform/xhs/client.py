@@ -58,6 +58,9 @@ class XHSClient(AbstractApiClient):
 
         if response.status_code == 200 or response.status_code == 200:
             return response
+        if response.status_code == 461:# 接口请求失败，有可能是请求次数过多，暂停几秒后再继续请求
+            logger.info(f"[xhs.XHSClient.request]状态码：461，暂停30-60秒后再请求")
+            random_wait(30,60)
 
         logger.warning(f"[xhs.XHSClient.request]请求错误:{response.content},状态码：{response.status_code}")
 
