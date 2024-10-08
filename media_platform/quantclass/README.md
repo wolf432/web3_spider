@@ -14,6 +14,11 @@ https://bbs.quantclass.cn/api/threads.v2?page=1&perPage=10&filter[sticky]=0&filt
 
 https://bbs.quantclass.cn/api/threads.detail.v2?pid=46354
 
+## 分类接口
+
+没有做认证校验
+
+https://bbs.quantclass.cn/api/categories
 
 ## 用户接口
 

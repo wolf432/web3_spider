@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from tools.utils import logger
+
 
 def current_time():
     """
@@ -49,7 +51,7 @@ def convert_to_ymd(date_str: str) -> str:
     return formatted_date
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def convert_timestamp_to_date(timestamp_ms: int) -> str:
@@ -74,4 +76,21 @@ def random_wait(start: int, end: int):
     在一个区间内随机等待
     """
     sec = random.uniform(start, end)
+    logger.debug(f'暂停{sec}秒执行')
     time.sleep(sec)
+
+
+def get_time_within_duration(days_duration):
+    """
+    获取以指定时间为基础，指定天数范围内的时间区间。
+
+    参数：
+    days_duration：天数范围。
+
+    返回：
+    开始时间和结束时间
+    """
+    current_time = datetime.now()
+    end_time = current_time - timedelta(days=days_duration)
+    end_time_without_microseconds = end_time.replace(microsecond=0)
+    return end_time_without_microseconds.strftime('%Y-%m-%d 00:00:00'), current_time.strftime('%Y-%m-%d 23:59:59')
