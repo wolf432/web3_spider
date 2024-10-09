@@ -10,7 +10,7 @@ from media_platform.twitter.service import UserService, ContentServie
 from media_platform.twitter.exception import APICALLERROR
 from models.twitter import XUser
 from database import get_db, get_redis
-from tools.message import send_msg
+from tools.message import send_msg_twitter
 from ai_toolkit.help import model_client_factory, system_message, user_message
 from ai_toolkit.prompt_manager import PromptManager
 from tools.utils import logger
@@ -80,7 +80,7 @@ def ai_summary(content, ai_type, model, prompt):
         logger.warning(f"调用大模型{ai_type}-{model}错误.{str(e)}")
         raise APICALLERROR("调用大模型错误")
 
-    rs = send_msg(notify_content)
+    rs = send_msg_twitter(notify_content)
     logger.info(f"发送信息结果：{str(rs)}")
 
 
