@@ -6,6 +6,6 @@ module.exports = {
     log_file: "logs/pm2_qtc.log",
     out_file: "logs/pm2_qtc_out.log",
     error_file: "logs/pm2_qtc_error.log",
-    merge_logs: true,
+    max_size: '100M',
   }]
 };

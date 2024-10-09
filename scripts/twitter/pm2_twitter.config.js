@@ -6,6 +6,6 @@ module.exports = {
     log_file: "logs/pm2_twitter.log",
     out_file: "logs/pm2_twitter_out.log",
     error_file: "logs/pm2_twitter_error.log",
-    merge_logs: true,
+    max_size: '100M',
   }]
 };
