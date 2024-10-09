@@ -12,7 +12,7 @@ from tools.time import convert_timestamp_to_date,random_wait
 from media_platform.xhs.help import sign, convert_str_cookie_to_dict, convert_cookies, chinese_to_number, get_search_id
 from media_platform.xhs.field import SearchSortType, SearchNoteType
 from media_platform.xhs.exception import IPBlockError, DataFetchError
-
+from tools.message import send_msg_error
 
 class XHSClient(AbstractApiClient):
 
@@ -44,6 +44,7 @@ class XHSClient(AbstractApiClient):
             random_wait(2,5)
         if login_try <= 0:
             logger.error("[xhs.XHSClient.__init__] 尝试登录5次失败，退出")
+            send_msg_error("[xhs.XHSClient.__init__] 尝试登录5次失败，退出")
             exit()
 
     def request(self, method, url, **kwargs):

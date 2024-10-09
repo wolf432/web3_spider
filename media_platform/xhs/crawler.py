@@ -13,7 +13,7 @@ from media_platform.xhs.exception import DataFetchError
 from media_platform.xhs.field import SearchSortType, SearchNoteType
 from media_platform.xhs.help import chinese_to_number
 from models.xhs import XHSNote, XHSUser
-from tools.time import convert_timestamp_to_date, random_wait
+from tools.time import convert_timestamp_to_date
 
 
 class XHSCrawler():
