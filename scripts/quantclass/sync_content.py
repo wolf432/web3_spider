@@ -20,7 +20,7 @@ cache_key = 'qtc_sync_content'
 
 
 def fetch_data_by_aid(aid: int, title: str, headers: dict):
-    logger.debug(f'开始获取：{title}，id={aid}')
+    logger.debug(f'[qtc.scripts.sync_content] 开始获取：{title}，id={aid}')
     try:
         content = crawler.get_article_detail_by_id(aid, headers)
         content_service.add(
@@ -28,19 +28,23 @@ def fetch_data_by_aid(aid: int, title: str, headers: dict):
         )
         summary_service.set_fetch(aid)
     except Exception as e:
-        logger.error(f'获取{aid}文章内容失败,{e}')
+        logger.error(f'[qtc.scripts.sync_content] 获取{aid}文章内容失败,{e}')
     random_wait(60, 100)
 
 
 def main(headers):
     if not crawler.is_login(headers):
-        logger.error(f'认证信息错误')
-        raise AUTHENError('认证信息错误')
+        logger.error(f'[qtc.scripts.sync_content] 认证信息错误')
+        raise AUTHENError('[qtc.scripts.sync_content] 认证信息错误')
     page = redis.get(cache_key)
     start_page = int(page) if page else 1
     while True:
-        logger.debug(f'开始获取第{start_page}页数据')
+        logger.debug(f'[qtc.scripts.sync_content] 开始获取第{start_page}页数据')
         page_total, data = summary_service.get_not_fetch(start_page)
+        # 没有可抓取的数据直接返回
+        if page_total == 0:
+            logger.info('[qtc.scripts.sync_content] 没有可抓取的数据')
+            return
         # 通过接口获取数据
         for article in data:
             fetch_data_by_aid(article.aid, article.title, headers)
@@ -55,7 +59,7 @@ if __name__ == '__main__':
     # 获取认证数据
     info = db.query(CookiePool).where(CookiePool.platform == 'qtc', CookiePool.use_status == 1).first()
     if info is None:
-        logger.error('获取认证数据失败')
+        logger.error('[qtc.scripts.sync_content] 获取认证数据失败')
         exit()
 
     while True:
@@ -65,4 +69,4 @@ if __name__ == '__main__':
         except AUTHENError:
             exit()
         except Exception as e:
-            logger.error(f'获取文章内容失败。{e}')
+            logger.error(f'[qtc.scripts.sync_content] 获取文章内容失败。{e}')

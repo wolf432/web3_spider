@@ -127,7 +127,7 @@ class ArticleSummaryService:
         """
         没有抓取内容的加精的数据
         """
-        query = self._db.query(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.is_essence == 2,quantclass.QtcArticleSummary.fetch==1)
+        query = self._db.query(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.is_essence == 1,quantclass.QtcArticleSummary.fetch==1)
         amount = query.count()
         page_total = math.ceil(amount / limit)
         start_page = (page - 1) * limit
