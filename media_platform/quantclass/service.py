@@ -125,15 +125,16 @@ class ArticleSummaryService:
 
     def get_not_fetch(self, page: int = 1, limit: int = 50):
         """
-        没有抓取内容的数据
+        没有抓取内容的加精的数据
         """
-        amount = self._db.query(quantclass.QtcArticleSummary).count()
+        query = self._db.query(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.is_essence == 2,quantclass.QtcArticleSummary.fetch==1)
+        amount = query.count()
         page_total = math.ceil(amount / limit)
         start_page = (page - 1) * limit
         if page > page_total:
             return 0, None
 
-        data = self._db.query(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.fetch==1).order_by(quantclass.QtcArticleSummary.id.desc()).offset(
+        data = query.order_by(quantclass.QtcArticleSummary.id.desc()).offset(
             start_page).limit(limit).all()
         return page_total, data
 
