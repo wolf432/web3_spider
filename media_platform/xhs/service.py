@@ -96,6 +96,7 @@ class NoteService:
     def add_note(self, field: XHSNote):
         note_info = self.get_info_by_note_id(field.note_id)
         if note_info:  # 如果存在则进行更新
+            logger.debug(f'[xhs.service.add_note]更新笔记{field.note_id}')
             cache_key = self.get_cache_keys('get_info_by_note_id', field.note_id)
             self._redis.delete(cache_key)
 
@@ -104,6 +105,7 @@ class NoteService:
                 if key != "_sa_instance_state" and value is not None:  # 过滤掉 SQLAlchemy 内部属性
                     setattr(note_info, key, value)
         else:
+            logger.debug(f'[xhs.service.add_note]新增笔记{field.note_id}')
             self._db.add(field)
         self._db.commit()
 

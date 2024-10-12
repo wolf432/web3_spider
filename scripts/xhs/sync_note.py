@@ -19,11 +19,11 @@ db = get_db()
 random_wait(300, 700)
 exec_cache_key = 'xhs_sync_note_exec'
 if redis.get(exec_cache_key):
-    logger.debug("[xsh.sysc_user] 已经同步过数据了，不在同步")
+    logger.debug("[xsh.sync_note] 已经同步过数据了，不在同步")
 
 cookie_pool = get_cookie_by_platform('xhs')
 if len(cookie_pool) == 0:
-    logger.error('[xsh.sysc_user]没有可用的cookie，退出脚本')
+    logger.error('[xsh.sync_note]没有可用的cookie，退出脚本')
     exit()
 
 for cookie in cookie_pool:
@@ -32,7 +32,7 @@ for cookie in cookie_pool:
         break
     except Exception as e:
         set_cookie_invalid('xhs', [cookie.id])
-        logger.error(f'[xsh.sysc_user]初始化浏览器失败，退出脚本.{e}')
+        logger.error(f'[xsh.sync_note]初始化浏览器失败，退出脚本.{e}')
         exit()
 
 user_service = UserService(db, redis)
@@ -50,26 +50,26 @@ for value in keywords:
     logger.info(f"开始同步关键词{value['keyword']},一共同步{value['page_size']}页")
     result = crawler.search_by_api(value['keyword'], value['page_size'],SearchNoteType.IMAGE,SearchSortType.GENERAL)
     if result is None:
-        logger.error('[xsh.sysc_user]搜索笔记数据为空，脚本停止运行')
+        logger.error('[xsh.sync_note]搜索笔记数据为空，脚本停止运行')
 
-    logger.debug(f"[xsh.sysc_user]同步用户数据，一共{len(result['user_fields'])}条数据需要同步")
+    logger.debug(f"[xsh.sync_note]同步用户数据，一共{len(result['user_fields'])}条数据需要同步")
     for user in result['user_fields']:
         user_service.add_user(user)
 
-    logger.debug(f"[xsh.sysc_user]获取笔记详情,一共{len(result['note_ids'])}条数据需要同步")
+    logger.debug(f"[xsh.sync_note]获取笔记详情,一共{len(result['note_ids'])}条数据需要同步")
 
     for note in result['note_ids']:
-        logger.info(f"[xsh.sysc_user]获取{note['id']}笔记，点赞数{note['liked_count']}")
+        logger.info(f"[xsh.sync_note]获取{note['id']}笔记，点赞数{note['liked_count']}")
 
         # 进行一个策略的过滤
         # 点赞数小于300的笔记不抓取
         if note['liked_count'] < 500:
-            logger.info(f"[xsh.sysc_user]获取{note['id']}过滤，点赞数{note['liked_count']},不足300.")
+            logger.info(f"[xsh.sync_note]获取{note['id']}过滤，点赞数{note['liked_count']},不足300.")
             continue
 
         field = crawler.note_detail_by_api(note['id'], note['xsec_token'], 'pc_search', value['keyword'])
         if field is None:
-            logger.warning(f"[xsh.sysc_user]{note['id']}笔记获取失败.")
+            logger.warning(f"[xsh.sync_note]{note['id']}笔记获取失败.")
             continue
 
         note_serivce.add_note(field)
