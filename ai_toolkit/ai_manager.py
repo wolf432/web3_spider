@@ -1,7 +1,3 @@
-from ai_toolkit.models.openai_model import OpenAIModel
-from ai_toolkit.models.chatglm_model import ChatGlmModel
-
-
 class AIManager:
     """
     AIManager类负责管理和调用不同的AI模型。
@@ -13,6 +9,21 @@ class AIManager:
         初始化AIManager，创建一个空字典用于存储模型实例。
         """
         self.models = {}
+        self._use_model = ''
+        self._big_model = ''
+
+    def use_big_model(self, big_model: str, model_name: str):
+        if not self.models.get(big_model):
+            raise ValueError(f"大模型'{big_model}'没有注册到类中")
+        self._big_model = big_model
+        self._use_model = model_name
+
+    def _check_params(self):
+        """
+        检查模型参数是否设置
+        """
+        if self._big_model == '' or self._use_model == '':
+            raise ValueError('请设置要使用的大模型和调用的模型名')
 
     def register_model(self, model_name, model_instance):
         """
@@ -24,7 +35,7 @@ class AIManager:
         """
         self.models[model_name] = model_instance
 
-    def chat(self, model_name, messages: list, model: str, **kwargs):
+    def chat(self, messages: list, **kwargs):
         """
         调用指定模型的chat方法。
 
@@ -36,26 +47,15 @@ class AIManager:
         返回:
         str: 模型生成的文本响应。
         """
-        model_instance = self.models.get(model_name)
+        self._check_params()
+        model_instance = self.models.get(self._big_model)
         if not model_instance:
-            raise ValueError(f"Model '{model_name}' is not registered.")
-        return model_instance.chat(messages, model, **kwargs)
+            raise ValueError(f"Model '{self._big_model}' is not registered.")
+        return model_instance.chat(messages, self._use_model, **kwargs)
 
-
-# 使用示例
-if __name__ == "__main__":
-    # 创建AIManager实例
-    ai_manager = AIManager()
-
-    # 注册OpenAI模型
-    openai_model = OpenAIModel(api_key="your-openai-api-key")
-    ai_manager.register_model("openai", openai_model)
-
-    # 注册智普模型
-    anthropic_model = ChatGlmModel(api_key="your-anthropic-api-key")
-    ai_manager.register_model("anthropic", anthropic_model)
-
-    # 调用聊天功能
-    response = ai_manager.chat("openai", "Hello, how are you?")
-    print(response)  # 输出AI模型的响应
-
+    def chat_image(self, messages: list, **kwargs):
+        self._check_params()
+        model_instance = self.models.get(self._big_model)
+        if not model_instance:
+            raise ValueError(f"Model '{self._big_model}' is not registered.")
+        return model_instance.chat_image(messages, **kwargs)

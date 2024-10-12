@@ -86,3 +86,10 @@ class OpenAIModel(BaseModel):
             return chat_completion
         except Exception as e:
             raise Exception(f"调用openai的chat出错。{str(e)}")
+
+    def chat_image(self,messages: list, **kwargs):
+        """
+        对图片进行问答
+        文档：https://platform.openai.com/docs/api-reference/chat/create
+        """
+        return self.chat(messages, 'gpt-4o')
