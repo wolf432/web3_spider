@@ -43,6 +43,7 @@ def main(headers):
         page_total, data = summary_service.get_not_fetch(start_page)
         # 没有可抓取的数据直接返回
         if page_total == 0:
+            redis.delete(cache_key)
             logger.info('[qtc.scripts.sync_content] 没有可抓取的数据')
             return
         # 通过接口获取数据
