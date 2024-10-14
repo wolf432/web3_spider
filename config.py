@@ -19,6 +19,7 @@ class Settings:
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL")
     ZHIPU_API_KEY: str = os.getenv("ZHIPU_API_KEY")
+    OLLAMA: str = os.getenv("OLLAMA")
 
 
 settings = Settings()

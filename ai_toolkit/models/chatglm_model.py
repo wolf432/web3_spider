@@ -14,6 +14,7 @@ class ChatGlmModel(BaseModel):
 
     def chat(self, messages: list, model: str = 'glm-4-plus', **kwargs):
         try:
+            stream = kwargs.get("stream", False)
             response = self._client.chat.completions.create(
                 # -------------------------------常用请求参数---------------------------------
                 # 上下文
@@ -35,7 +36,7 @@ class ChatGlmModel(BaseModel):
                 # 该参数在使用同步调用时应设置为false或省略。表示模型在生成所有内容后一次性返回所有内容。默认值为false。
                 # 如果设置为true，模型将通过标准Event Stream逐块返回生成的内容。
                 # 当Event Stream结束时，将返回一个data: [DONE]消息。出
-                stream=kwargs.get("stream", False),
+                stream=stream,
 
                 # 模型可以调用的工具。
                 tools=kwargs.get("tools", None),
@@ -45,7 +46,9 @@ class ChatGlmModel(BaseModel):
                 # 用户的 ID，用于 GPT 可以监控以及检测某个用户是否对该 api 进行滥用，不常用。
                 user_id=kwargs.get("user_id", 'user_id')
             )
-            return response
+            if stream:
+                return response
+            return response.choices[0].message.content
         except Exception as e:
             raise Exception(f"调用智普的chat出错。{str(e)}")
 

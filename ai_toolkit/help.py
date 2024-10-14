@@ -7,6 +7,7 @@ from ai_toolkit.ai_manager import AIManager
 from ai_toolkit import exception
 from ai_toolkit.models.chatglm_model import ChatGlmModel
 from ai_toolkit.models.openai_model import OpenAIModel
+from ai_toolkit.models.ollama_model import OllamaModel
 
 
 def system_message(content: str):
@@ -122,6 +123,11 @@ def get_ai_manager(big_model: str = '', model_name: str = ''):
     # 注册智普模型
     zhipu_model = ChatGlmModel(api_key=settings.ZHIPU_API_KEY)
     ai_manager.register_model("zhipu", zhipu_model)
+
+    if settings.OLLAMA:
+        # 注册本地大模型
+        ollama = OllamaModel()
+        ai_manager.register_model('ollama',ollama)
 
     if big_model != '' and model_name != '':
         ai_manager.use_big_model(big_model, model_name)

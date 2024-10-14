@@ -22,3 +22,4 @@ MESSAGE_ERROR_TOKEN=111
 OPENAI_API_KEY=
 OPENAI_BASE_URL= #大模型请求地址，openai代理需要填写
 ZHIPU_API_KEY=
+OLLAMA=False # 是否开启Ollama的本地大模型

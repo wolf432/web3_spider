@@ -24,6 +24,7 @@ class OpenAIModel(BaseModel):
     def chat(self, messages: list, model: str = 'gpt-4o', **kwargs):
 
         try:
+            stream = kwargs.get("stream", False)
             chat_completion = self._openai.chat.completions.create(
                 # -------------------------------常用请求参数---------------------------------
                 # 上下文
@@ -51,7 +52,7 @@ class OpenAIModel(BaseModel):
                 n=1,
 
                 # 是否是流式输出。True表示流式输出，False表示非流式输出
-                stream=kwargs.get("stream", False),
+                stream=stream,
 
                 # 指定GPT的答复格式，取值为：text(默认) 或 json_object
                 # 但是不太好的是，如果开启了这个功能的，你的prompt最后要加一句'以json格式输出'，
@@ -82,8 +83,10 @@ class OpenAIModel(BaseModel):
                 # 用户的 ID，用于 GPT 可以监控以及检测某个用户是否对该 api 进行滥用，不常用。
                 user=kwargs.get("user", 'user_id')
             )
+            if stream:
+                return chat_completion
 
-            return chat_completion
+            return chat_completion.choices[0].message.content
         except Exception as e:
             raise Exception(f"调用openai的chat出错。{str(e)}")
 
