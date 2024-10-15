@@ -27,6 +27,7 @@ class XUser(Base):
     friends_count: Mapped[int] = mapped_column(Integer, default=0, nullable=True, comment="关注数量")
     statuses_count: Mapped[int] = mapped_column(Integer, default=0, nullable=True, comment="帖子数")
     is_monitored: Mapped[int] = mapped_column(Integer, default=1, nullable=True, comment="是否监控内容")
+    full: Mapped[int] = mapped_column(Integer, default=1, nullable=True, comment="是否抓取全量数据，1-否,2-是")
 
 
 class CookiePool(Base):

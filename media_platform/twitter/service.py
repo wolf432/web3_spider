@@ -42,6 +42,11 @@ class UserService():
         else:
             raise NoData(f"没有找到要跟新的数据,{user_info.name}")
 
+    def set_full(self, uid):
+        stmt = update(XUser).where(XUser.id == uid).values(full=1)
+        self._db.execute(stmt)
+        self._db.commit()
+
     def add_all(self, user_list: [UserInfo]):
         """
         批量添加用户数据

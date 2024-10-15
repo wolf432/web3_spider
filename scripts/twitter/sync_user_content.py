@@ -31,10 +31,11 @@ for user in user_list:
         logger.debug(f"{user.name}已经更新过，不需要在更新")
         continue
     try:
-        content_amount = content_service.get_amount_by_user_id(user.rest_id)
-        page = 200 if content_amount == 0 else 1
+        page = 200 if user.full == 2 else 1
         crawler.sync_content_by_name(user.name,page)
         redis.set(tmp_cache_key, 1, 600)
+        if user.full == 2:
+            user_service.set_full(user.id)
     except (TokenWaitError, RateLimitError) as e:
         logger.error(f'所有Token都不可用，等待15分钟后再请求,{str(e)}')
         exit()
