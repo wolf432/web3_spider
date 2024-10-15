@@ -261,3 +261,10 @@ class ContentServie():
             query = query.where(TweetSummaries.user_id == user_id, TweetSummaries.x_created_at > date)
 
         return query.order_by(TweetSummaries.x_created_at.desc()).limit(limit).all()
+
+    def get_amount_by_user_id(self, user_id: int):
+        """
+        获取指定用户的内容数量
+        :return: int
+        """
+        return self._db.query(TweetSummaries).where(TweetSummaries.user_id == user_id).count()

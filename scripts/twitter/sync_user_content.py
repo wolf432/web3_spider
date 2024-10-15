@@ -4,7 +4,7 @@
 import traceback
 
 from media_platform.twitter.crawler import TwitterCrawler
-from media_platform.twitter.service import UserService
+from media_platform.twitter.service import UserService,ContentServie
 from media_platform.twitter.exception import RateLimitError, TokenWaitError
 from database import get_db, get_redis
 from tools.utils import logger
@@ -14,6 +14,7 @@ db = get_db()
 
 crawler = TwitterCrawler(db, redis)
 user_service = UserService(db)
+content_service = ContentServie(db)
 
 # 记录更新过的缓存账号
 cache_key = 'sync_user_content_'
@@ -30,7 +31,9 @@ for user in user_list:
         logger.debug(f"{user.name}已经更新过，不需要在更新")
         continue
     try:
-        crawler.sync_content_by_name(user.name)
+        content_amount = content_service.get_amount_by_user_id(user.rest_id)
+        page = 200 if content_amount == 0 else 1
+        crawler.sync_content_by_name(user.name,page)
         redis.set(tmp_cache_key, 1, 600)
     except (TokenWaitError, RateLimitError) as e:
         logger.error(f'所有Token都不可用，等待15分钟后再请求,{str(e)}')
