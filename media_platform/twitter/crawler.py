@@ -8,8 +8,9 @@ from models.twitter import CookiePool
 from media_platform.twitter.field import CookieIdentity
 from media_platform.twitter.client import TwitterClient
 from media_platform.twitter import help
-from media_platform.twitter.exception import NoData, RateLimitError, DataAddError
+from media_platform.twitter.exception import TokenWaitError, RateLimitError, DataAddError
 from tools.utils import logger
+from tools.time import random_wait
 from media_platform.twitter.service import UserService, CookieService, ContentServie
 from models.twitter import TweetSummaries
 
@@ -23,57 +24,61 @@ class TwitterCrawler():
 
         self._client = TwitterClient(db, redis, timeout)
 
-    def get_content_by_name(self, name: str, limit: int = 20):
+    def get_content_by_name(self, name: str, next_course: str | None = None):
         """
         获取指定用户的推特内容列表
-        :param limit: 获取内容的条数
         :param name: 用户名
+        :param next_course: 向下翻页的定位值
         :return:
         """
         user = self._user_service.get_user_by_name(name)
         result = []
-        next_course = None
-        while limit > 0:
-            content = self._client.api_user_tweets(user.rest_id, next_course=next_course)
-            next_course = content['next_cursor']
-            for data in content["data"]:
-                if limit < 1:
-                    break
-                result.append(data)
-                limit -= 1
-        return result
+        content = self._client.api_user_tweets(user.rest_id, next_course=next_course)
+        next_course = content['next_cursor']
+        for data in content["data"]:
+            result.append(data)
 
-    def sync_content_by_name(self, name: str, limit: int = 20):
+        return result, next_course
+
+    def sync_content_by_name(self, name: str, page: int = 1):
         """
         同步指定用户的文章到数据库
         :param name: 用户名
-        :param limit: 同步数量
+        :param page: 同步几页数据，默认同步一页
         :return:
         """
-        content_list = self.get_content_by_name(name, limit)
+        next_course = None
         logger.info(f"开始同步{name}的推特内容.")
-        # 排重
-        data = []
-        for con in content_list:
-            data.append(
-                TweetSummaries(
-                    content=con["content"],
-                    reply_count=con["reply_count"],
-                    retweet_count=con["retweet_count"],
-                    views_count=con["views_count"],
-                    like_count=con["favorite_count"],
-                    x_created_at=con["created_at"],
-                    user_id=con["user_id"],
-                    rest_id=con["id"],
-                )
-            )
-        try:
-            self._content_service.add_all(data)
-        except DataAddError as e:
-            logger.error(f"添加推特列表内容失败:{str(e)}")
-            return ''
 
-        logger.info(f"{name}的推特内容同步完成.同步了{len(data)}条数据")
+        while page > 0:
+            try:
+                content_list, next_course = self.get_content_by_name(name, next_course)
+                data = []
+                for con in content_list:
+                    data.append(
+                        TweetSummaries(
+                            content=con["content"],
+                            reply_count=con["reply_count"],
+                            retweet_count=con["retweet_count"],
+                            views_count=con["views_count"],
+                            like_count=con["favorite_count"],
+                            x_created_at=con["created_at"],
+                            user_id=con["user_id"],
+                            rest_id=con["id"],
+                        )
+                    )
+                self._content_service.add_all(data)
+                if page > 1:
+                    random_wait(3,5)
+            except DataAddError as e:
+                logger.error(f"添加推特列表内容失败:{str(e)}")
+                return ''
+
+            except TokenWaitError as e:
+                logger.warning(f'获取{name}推特内容时，接口限制，等待15分钟后重试')
+                time.sleep(910)
+
+        logger.info(f"{name}的推特内容同步完成")
 
     def get_detail_content(self, tweet_id: int):
         """
@@ -87,7 +92,7 @@ class TwitterCrawler():
 
         headers = help.get_user_cookie(cookie.value)
 
-        result = self._client.api_tweet_detail_text(tweet_id, headers)
+        result = self._client.api_tweet_detail_text(tweet_id)
         return result
 
     def sync_following(self, user_id: int):
@@ -128,7 +133,7 @@ class TwitterCrawler():
         user_list = self._user_service.get_user_list_latest()
         for user in user_list:
             # 检查上次跟新时间，1小时内不再更新
-            updated_at = user.updated_at  if user.updated_at else 0
+            updated_at = user.updated_at if user.updated_at else 0
             if updated_at != 0:
                 time_difference = current_time - updated_at
                 difference = time_difference.total_seconds()

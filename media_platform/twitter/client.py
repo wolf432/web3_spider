@@ -7,11 +7,11 @@ from base.base_crawler import AbstractApiClient
 from media_platform.twitter.exception import *
 from media_platform.twitter.field import UserInfo, CookieIdentity
 from media_platform.twitter.help import extract_value_from_url, get_headers
-from media_platform.twitter.exception import TokenWaitError
+from media_platform.twitter.exception import TokenWaitError, DataFetchError
 from models.twitter import CookiePool
 from tools import utils
 from tools import time
-
+from tools.message import send_msg_error
 
 class TwitterClient(AbstractApiClient):
     # 需要登录用户cookie的接口
@@ -35,14 +35,18 @@ class TwitterClient(AbstractApiClient):
 
         self._init_cookie_pool()
 
+    def get_cookie_by_db(self):
+        return self._db.query(CookiePool).where(CookiePool.identity_type == CookieIdentity.USER.value,
+                                                CookiePool.platform == 'x',
+                                                CookiePool.use_status == 1).all()
+
     def _init_cookie_pool(self):
         """
         初始化cookie池的缓存
         :return:
         """
         utils.logger.info("初始化cookie池")
-        pools = self._db.query(CookiePool).where(CookiePool.identity_type == CookieIdentity.USER.value,
-                                                 CookiePool.use_status == 1).all()
+        pools = self.get_cookie_by_db()
         if len(pools) == 0:
             raise Exception("没有可用的cookie")
 
@@ -64,13 +68,7 @@ class TwitterClient(AbstractApiClient):
                 }
                 self._redis.lpush(cache_key, json.dumps(cookie))
 
-    def get_by_header(self, url, params: dict | None = None):
-        """
-        根据请求的url来设置cookie
-        :param url: url
-        :param params: 参数
-        :return:
-        """
+    def get_cookie(self, url):
         api_name = extract_value_from_url(url)
         if not self.API_LIMITS.get(api_name):
             utils.logger.error(f"请求{api_name}接口不存在")
@@ -80,6 +78,7 @@ class TwitterClient(AbstractApiClient):
         queue_len = self._redis.llen(cache_key)
         current_time = time.current_unixtime()
         cookie = {}
+        utils.logger.error(f"请求{api_name}队列长度{queue_len}")
 
         while queue_len > 0:
             cache_value = self._redis.lpop(cache_key)
@@ -87,7 +86,6 @@ class TwitterClient(AbstractApiClient):
                 raise RateLimitError("没有可用的cookie")
 
             cookie = json.loads(cache_value)
-
             if cookie['limit'] > 0 or current_time > cookie['limit_reset']:
                 break
 
@@ -98,16 +96,41 @@ class TwitterClient(AbstractApiClient):
         if not cookie:
             raise TokenWaitError('等待15分钟后刷新再使用')
 
-        _headers = get_headers()
-        _headers["cookie"] = f"auth_token={cookie['auth_token']};ct0={cookie['cto']}"
-        _headers["x-csrf-token"] = cookie['cto']
+        return cookie, cache_key
 
-        response = self.request(method="GET", url=f"{url}", params=params, headers=_headers)
+    def get_by_header(self, url, params: dict | None = None):
+        """
+        根据请求的url来设置cookie
+        :param url: url
+        :param params: 参数
+        :return:
+        """
+        data = self.get_cookie_by_db()
+        max_len = len(data)
+        while max_len > 0:
+            cookie, cache_key = self.get_cookie(url)
 
-        cookie['limit'] = int(response.headers.get('x-rate-limit-remaining', cookie['limit']))
-        cookie['limit_reset'] = int(response.headers.get('x-rate-limit-reset', 0))
-        self._redis.lpush(cache_key, json.dumps(cookie))
-        return response
+            _headers = get_headers()
+            _headers["cookie"] = f"auth_token={cookie['auth_token']};ct0={cookie['cto']}"
+            _headers["x-csrf-token"] = cookie['cto']
+
+            try:
+                response = self.request(method="GET", url=f"{url}", params=params, headers=_headers)
+            except (RateLimitError,TokenExpiredError):
+                continue
+
+            cookie['limit'] = int(response.headers.get('x-rate-limit-remaining', cookie['limit']))
+            cookie['limit_reset'] = int(response.headers.get('x-rate-limit-reset', 0))
+            result = response.json()
+            errors = result.get('errors')
+            max_len -= 1
+            if errors:
+                send_msg_error(f'推特的cookie出问题了。{cookie["cto"]}。errors:{errors[0]["message"]}')
+                utils.logger.error(f'[x_media_platform.twitter.client.get_by_header]{errors[0]["message"]}')
+                continue
+
+            self._redis.lpush(cache_key, json.dumps(cookie))
+            return response
 
     def request(self, method, url, **kwargs):
         """
@@ -202,8 +225,6 @@ class TwitterClient(AbstractApiClient):
         :param next_course: 向下翻页的定位值
         :return:
         """
-        utils.logger.debug(f"调用api_user_tweets接口查询user_id={str(user_id)}")
-
         variables_json = {
             "userId": user_id,
             "count": 20,
@@ -220,11 +241,9 @@ class TwitterClient(AbstractApiClient):
         fieldToggles = '{"withArticlePlainText":false}'
         url = f'https://api.x.com/graphql/E3opETHurmVJflFsUBVuUQ/UserTweets?variables={variables}&features={features}&fieldToggles={fieldToggles}'
 
-        # response = self.get(url, headers=headers)
         response = self.get_by_header(url)
 
         result = response.json()
-
         instructions = result["data"]["user"]["result"]["timeline_v2"]["timeline"]["instructions"]
 
         # 获取时间数据列表
@@ -319,12 +338,11 @@ class TwitterClient(AbstractApiClient):
             "next_cursor": next_cursor
         }
 
-    def api_tweet_detail_text(self, tweet_id: int, headers: dict):
+    def api_tweet_detail_text(self, tweet_id: int):
         """
         获取指定帖子的内容，不获取回复
         访问限制：150/15分钟
         :param tweet_id:
-        :param headers:
         :return:
         """
         utils.logger.debug(f"api_tweet_detail_text接口调用，tweet_id={tweet_id}")
