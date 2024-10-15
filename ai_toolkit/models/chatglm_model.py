@@ -52,7 +52,7 @@ class ChatGlmModel(BaseModel):
         except Exception as e:
             raise Exception(f"调用智普的chat出错。{str(e)}")
 
-    def chat_image(self,messages: list, **kwargs):
+    def chat_image(self, messages: list, **kwargs):
         """
         对图片进行问答
         文档：https://open.bigmodel.cn/dev/api/normal-model/glm-4v
@@ -76,3 +76,13 @@ class ChatGlmModel(BaseModel):
             return response
         except Exception as e:
             raise Exception(f"调用智普的chat出错。{str(e)}")
+
+    def embedding(self, content: list):
+        """
+        内容转换成向量
+        """
+        response = self._client.embeddings.create(
+            model='embedding-3',
+            input=content
+        )
+        return response

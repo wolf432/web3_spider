@@ -59,3 +59,10 @@ class AIManager:
         if not model_instance:
             raise ValueError(f"Model '{self._big_model}' is not registered.")
         return model_instance.chat_image(messages, **kwargs)
+
+    def embedding(self, content: list):
+        self._check_params()
+        model_instance = self.models.get(self._big_model)
+        if not model_instance:
+            raise ValueError(f"Model '{self._big_model}' is not registered.")
+        return model_instance.embedding(content)

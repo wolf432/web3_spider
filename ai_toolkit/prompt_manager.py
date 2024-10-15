@@ -1,5 +1,6 @@
 import os
 import inspect
+from string import Template
 
 prompt_directory = os.path.join(os.getcwd(), "prompts")
 
@@ -28,7 +29,7 @@ class PromptManager:
 
         # 替换占位符
         try:
-            formatted_content = markdown_content.format(**kwargs)
+            formatted_content = Template(markdown_content).substitute(**kwargs)
         except KeyError as e:
             raise ValueError(f"Missing value for placeholder: {e}")
 

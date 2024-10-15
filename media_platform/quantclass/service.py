@@ -138,11 +138,27 @@ class ArticleSummaryService:
             start_page).limit(limit).all()
         return page_total, data
 
-    def set_fetch(self, aid:int):
+    def set_fetch(self, aid: int):
         """
         设置内容已抓取
         """
-        stmt = update(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.aid==aid).values(fetch=2)
+        stmt = update(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.aid == aid).values(fetch=2)
+        self._db.execute(stmt)
+        self._db.commit()
+
+    def set_segmentation(self, aid: int):
+        """
+        设置内容已分段
+        """
+        stmt = update(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.aid == aid).values(segmentation=1)
+        self._db.execute(stmt)
+        self._db.commit()
+
+    def set_tag(self, tag: str):
+        """
+        设置内容已抓取
+        """
+        stmt = update(quantclass.QtcArticleSummary).where(quantclass.QtcArticleSummary.tags == tag).values(fetch=2)
         self._db.execute(stmt)
         self._db.commit()
 
@@ -171,3 +187,21 @@ class ArticleContentService:
             ))
         self._db.commit()
         return True
+
+    def add_segmentation(self, field: quantclass.ArticleSegmentation):
+        """
+        添加文章分段内容
+        """
+        self._db.add(quantclass.ArticleSegmentation(
+                aid=field.aid,
+                content=field.content,
+                seq=field.seq
+        ))
+        self._db.commit()
+        return True
+
+    def get_segmentation_by_ids(self, ids: [int]):
+        """
+        根据id获取多个数据
+        """
+        return self._db.query(quantclass.ArticleSegmentation).where(quantclass.ArticleSegmentation.id.in_(ids)).all()

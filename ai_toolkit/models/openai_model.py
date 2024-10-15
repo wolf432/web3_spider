@@ -8,6 +8,7 @@ class OpenAIModel(BaseModel):
         OpenAIModel是OpenAI API的具体实现类，继承了BaseModel。它实现了聊天功能
         文档：https://platform.openai.com/docs/api-reference/chat
     """
+
     def __init__(self, api_key: str, base_url: str = 'https://api.openai.com/v1'):
         """
             构造函数，初始化OpenAI API的API密钥。
@@ -90,9 +91,21 @@ class OpenAIModel(BaseModel):
         except Exception as e:
             raise Exception(f"调用openai的chat出错。{str(e)}")
 
-    def chat_image(self,messages: list, **kwargs):
+    def chat_image(self, messages: list, **kwargs):
         """
         对图片进行问答
         文档：https://platform.openai.com/docs/api-reference/chat/create
         """
         return self.chat(messages, 'gpt-4o')
+
+    def embedding(self, content: list, model_name: str = 'text-embedding-3-small'):
+        """
+        内容转换成向量
+        :content 要转行的内容
+        :model_name: 要选择的模型，支持的有：text-embedding-3-small、text-embedding-3-large、ada v2
+        """
+        response = self._openai.embeddings.create(
+            model='embedding-3',
+            input=content
+        )
+        return response
