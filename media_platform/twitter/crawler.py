@@ -74,10 +74,6 @@ class TwitterCrawler():
                 logger.error(f"添加推特列表内容失败:{str(e)}")
                 return ''
 
-            except TokenWaitError as e:
-                logger.warning(f'获取{name}推特内容时，接口限制，等待15分钟后重试')
-                time.sleep(910)
-
         logger.info(f"{name}的推特内容同步完成")
 
     def get_detail_content(self, tweet_id: int):
