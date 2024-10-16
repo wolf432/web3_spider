@@ -1,7 +1,7 @@
 import random
 import time
-from datetime import datetime
 from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta
 
 from tools.utils import logger
 
@@ -51,10 +51,7 @@ def convert_to_ymd(date_str: str) -> str:
     return formatted_date
 
 
-from datetime import datetime, timedelta
-
-
-def convert_timestamp_to_date(timestamp_ms: int) -> str:
+def convert_timestamp_to_date(timestamp_ms: int, format = '%Y-%m-%d %H:%M:%S') -> str:
     """
     将毫秒级时间戳转换为格式为 “年 - 月 - 日” 的日期字符串
 
@@ -68,22 +65,22 @@ def convert_timestamp_to_date(timestamp_ms: int) -> str:
     dt = datetime.fromtimestamp(timestamp_s)
 
     # Format the datetime object to "YYYY-MM-DD H:i:s"
-    return dt.strftime("%Y-%m-%d %H:%M:%S")
+    return dt.strftime(format)
 
 
-def timestamp_to_date(timestamp: int) -> str:
+def timestamp_to_date(timestamp: int, format = '%Y-%m-%d %H:%M:%S') -> str:
     """
     将unix时间戳转换为格式为 “年 - 月 - 日” 的日期字符串
 
     :param timestamp: unix时间戳
-    :return: A string representing the date in  YYYY-MM-DD HH:MM:SS format
+    :return: 返回指定的时间格式
     """
 
     # Convert to a datetime object
     dt = datetime.fromtimestamp(timestamp)
 
     # Format the datetime object to "YYYY-MM-DD H:i:s"
-    return dt.strftime("%Y-%m-%d %H:%M:%S")
+    return dt.strftime(format)
 
 
 def random_wait(start: int, end: int):
@@ -109,3 +106,12 @@ def get_time_within_duration(days_duration):
     end_time = current_time - timedelta(days=days_duration)
     end_time_without_microseconds = end_time.replace(microsecond=0)
     return end_time_without_microseconds.strftime('%Y-%m-%d 00:00:00'), current_time.strftime('%Y-%m-%d 23:59:59')
+
+
+def today_unix_time():
+    # 获取当前时间
+    now = datetime.now()
+    # 获取当天 0 点时间
+    today_zero = datetime(now.year, now.month, now.day)
+    # 将 0 点时间转换为时间戳
+    return int(time.mktime(today_zero.timetuple()))

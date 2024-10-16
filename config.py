@@ -16,6 +16,7 @@ class Settings:
     LOG_LEVEL: str = os.getenv("LOG_LEVEL")
     MESSAGE_TOKEN: str = os.getenv("MESSAGE_TOKEN")
     MESSAGE_ERROR_TOKEN: str = os.getenv("MESSAGE_ERROR_TOKEN")
+    MESSAGE_ARTICLE_TOKEN: str = os.getenv("MESSAGE_ARTICLE_TOKEN")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL")
     ZHIPU_API_KEY: str = os.getenv("ZHIPU_API_KEY")
