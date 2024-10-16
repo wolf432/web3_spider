@@ -37,7 +37,7 @@ def get_latest_content_by_rest_id(user_list: [XUser]):
         # 获取最新的内容
         contents = content_service.get_latest_by_user_id(user.rest_id, x_created_at)
         if len(contents) == 0:
-            logger.debug(f"{user.name}没有最新的内容")
+            logger.debug(f"{user.name}截止{x_created_at}，没有最新的内容")
             continue
 
         redis.set(cache_key, str(contents[0].x_created_at))
