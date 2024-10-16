@@ -11,7 +11,7 @@ from media_platform.twitter.exception import APICALLERROR
 from models.twitter import XUser
 from database import get_db, get_redis
 from tools.message import send_msg_twitter
-from ai_toolkit.help import model_client_factory, system_message, user_message
+from ai_toolkit.help import get_ai_manager, system_message, user_message
 from ai_toolkit.prompt_manager import PromptManager
 from tools.utils import logger
 from tools.time import format_datetime, random_wait
@@ -73,9 +73,8 @@ def ai_summary(content, ai_type, model, prompt):
     try:
         message_list.append(user_message(notify_content))
 
-        ai_client = model_client_factory(ai_type)
-        response = ai_client.chat(message_list, model)
-        notify_content = response.choices[0].message.content
+        ai_client = get_ai_manager(ai_type,model)
+        notify_content = ai_client.chat(message_list)
     except Exception as e:
         logger.warning(f"调用大模型{ai_type}-{model}错误.{str(e)}")
         raise APICALLERROR("调用大模型错误")
