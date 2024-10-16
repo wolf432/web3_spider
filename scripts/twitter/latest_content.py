@@ -14,7 +14,7 @@ from tools.message import send_msg_twitter
 from ai_toolkit.help import model_client_factory, system_message, user_message
 from ai_toolkit.prompt_manager import PromptManager
 from tools.utils import logger
-from tools.time import format_datetime
+from tools.time import format_datetime, random_wait
 
 redis = get_redis()
 db = get_db()
@@ -108,4 +108,4 @@ def main():
 if __name__ == '__main__':
     while True:
         main()
-        time.sleep(10)
+        random_wait(10, 60)
