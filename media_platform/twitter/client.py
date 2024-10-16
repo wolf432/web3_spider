@@ -88,10 +88,12 @@ class TwitterClient(AbstractApiClient):
                 raise RateLimitError("没有可用的cookie")
 
             cookie = json.loads(cache_value)
-            limit_reset = time.timestamp_to_date(cookie['limit_reset'])
-            utils.logger.info(f"limit={cookie['limit']},刷新时间={limit_reset}")
             if cookie['limit'] > 0 or current_time > cookie['limit_reset']:
                 break
+
+            limit_reset = time.timestamp_to_date(cookie['limit_reset'])
+            utils.logger.debug(f"limit={cookie['limit']},刷新时间={limit_reset}")
+
 
             queue_len -= 1
             self._redis.lpush(cache_key, cache_value)
