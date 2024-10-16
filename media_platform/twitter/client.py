@@ -1,3 +1,5 @@
+import logging
+
 import requests
 import json
 from sqlalchemy.orm import Session
@@ -78,7 +80,7 @@ class TwitterClient(AbstractApiClient):
         queue_len = self._redis.llen(cache_key)
         current_time = time.current_unixtime()
         cookie = {}
-        utils.logger.error(f"请求{api_name}队列长度{queue_len}")
+        utils.logger.debug(f"请求{api_name}队列长度{queue_len}")
 
         while queue_len > 0:
             cache_value = self._redis.lpop(cache_key)
@@ -86,6 +88,8 @@ class TwitterClient(AbstractApiClient):
                 raise RateLimitError("没有可用的cookie")
 
             cookie = json.loads(cache_value)
+            limit_reset = time.timestamp_to_date(cookie['limit_reset'])
+            utils.logger.info(f"limit={cookie['limit']},刷新时间={limit_reset}")
             if cookie['limit'] > 0 or current_time > cookie['limit_reset']:
                 break
 

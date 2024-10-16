@@ -52,6 +52,7 @@ class TwitterCrawler():
 
         while page > 0:
             try:
+                logger.debug(f'还要获取{page}页数据')
                 content_list, next_course = self.get_content_by_name(name, next_course)
                 data = []
                 for con in content_list:
@@ -70,6 +71,7 @@ class TwitterCrawler():
                 self._content_service.add_all(data)
                 if page > 1:
                     random_wait(3,5)
+                page -= 1
             except DataAddError as e:
                 logger.error(f"添加推特列表内容失败:{str(e)}")
                 return ''

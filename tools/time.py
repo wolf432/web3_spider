@@ -71,6 +71,21 @@ def convert_timestamp_to_date(timestamp_ms: int) -> str:
     return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def timestamp_to_date(timestamp: int) -> str:
+    """
+    将unix时间戳转换为格式为 “年 - 月 - 日” 的日期字符串
+
+    :param timestamp: unix时间戳
+    :return: A string representing the date in  YYYY-MM-DD HH:MM:SS format
+    """
+
+    # Convert to a datetime object
+    dt = datetime.fromtimestamp(timestamp)
+
+    # Format the datetime object to "YYYY-MM-DD H:i:s"
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
 def random_wait(start: int, end: int):
     """
     在一个区间内随机等待
