@@ -10,7 +10,8 @@ from datetime import datetime
 from database import get_redis
 from tools.encrypt import calculate_md5
 from tools.time import today_unix_time, convert_timestamp_to_date, random_wait, current_unixtime
-from tools.message import send_msg_article, send_msg_error
+from tools.message import send_msg_article
+from tools.utils import logger
 
 # https://www.okx.com/zh-hans/web3/discover/cryptopedia  web3活动公告
 
@@ -76,6 +77,7 @@ def main(_today_time):
     markdown = "https://www.okx.com/zh-hans/help/section/announcements-latest-announcements\n"
     data = get_okex_page_info(_today_time)
     if len(data) == 0:
+        logger.info('Okx没有新的公告')
         return
 
     for info in data:

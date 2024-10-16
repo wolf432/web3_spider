@@ -2,7 +2,6 @@
 抓取币安的公告
 """
 import time
-import json
 from urllib.parse import quote
 import requests
 import traceback
@@ -11,6 +10,7 @@ from datetime import datetime
 from database import get_redis
 from tools.time import today_unix_time, convert_timestamp_to_date, random_wait
 from tools.message import send_msg_article
+from tools.utils import logger
 
 # https://www.okx.com/zh-hans/web3/discover/cryptopedia  web3活动公告
 
@@ -91,6 +91,7 @@ def binance(_today_time):
         markdown += f"{cname}\n"
         data = get_binance_page_info(cate, _today_time)
         if len(data) == 0:
+            logger.info('币安没有新的公告')
             continue
 
         for info in data:
